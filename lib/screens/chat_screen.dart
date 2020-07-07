@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// Streams TODO 1: import cloud firesotre
+// StreamBuilder TODO 1: import cloud firestore
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -34,10 +34,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
 //Listen to the streams come over from firebase
-  // Streams TODO 2: Create stream function
 
   void messagesStream() async {
-    // Streams TODO 3: await for loop through streams
     await for (var snapshot in _firestore.collection('messages').snapshots()) {
       for (var message in snapshot.documents) {
         print(message.data);
@@ -54,7 +52,6 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: Icon(Icons.close),
               onPressed: () {
-                // Streams TODO 4: Use stream function
                 messagesStream();
 //                _auth.signOut();
 //                Navigator.pop(context);
@@ -68,6 +65,38 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            // StreamBuilder TODO 2: Create StreamBuilder
+            StreamBuilder<QuerySnapshot>(
+              // StreamBuilder TODO 3: Get Stream snapshots
+              stream: _firestore.collection('messages').snapshots(),
+              builder: (context, snapshot) {
+                // StreamBuilder TODO 5: Handle empty data with Spinner
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: Colors.lightBlueAccent,
+                    ),
+                  );
+                }
+
+                // StreamBuilder TODO 4: Get data out of snapshots
+                //   data here is asyncSnapShot from flutter
+                final messages = snapshot.data.documents;
+                List<Text> messageWidgets = [];
+                for (var message in messages) {
+                  //  data here is a document snapshot from firebase
+                  final messageText = message.data['text'];
+                  final messageSender = message.data['sender'];
+                  final messageWidget =
+                      Text('$messageText from $messageSender');
+                  messageWidgets.add(messageWidget);
+                }
+                // StreamBuilder TODO 6: Return Widget in StreamBuilder
+                return Column(
+                  children: messageWidgets,
+                );
+              },
+            ),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
