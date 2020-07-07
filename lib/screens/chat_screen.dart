@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
-// firebase auth TODO 4. import firebase auth
 import 'package:firebase_auth/firebase_auth.dart';
+// firestore TODO 1: import cloud firesotre
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
@@ -10,18 +11,19 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  // firebase auth TODO 5. Create firebase auth instance
+  // firestore TODO 2: Create firesotre instance
+  final _firestore = Firestore.instance;
   final _auth = FirebaseAuth.instance;
   FirebaseUser loggedInUser;
+  // firestore TODO 3: Create messageText variable
+  String messageText;
 
   @override
   void initState() {
     super.initState();
-    // firebase auth TODO 7. Using current user method when initState
     getCurrentUser();
   }
 
-  // firebase auth TODO 6. Create get current user method
   void getCurrentUser() async {
     try {
       final user = await _auth.currentUser();
@@ -63,14 +65,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   Expanded(
                     child: TextField(
                       onChanged: (value) {
-                        //Do something with the user input.
+                        messageText = value;
                       },
                       decoration: kMessageTextFieldDecoration,
                     ),
                   ),
                   FlatButton(
                     onPressed: () {
-                      //Implement send functionality.
+                      // firestore TODO 4: Add map data into firestore collection
+                      _firestore.collection('messages').add(
+                          {'text': messageText, 'sender': loggedInUser.email});
                     },
                     child: Text(
                       'Send',
